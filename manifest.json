@@ -1,33 +1,26 @@
 {
-    "manifest_version": 3,
-    "name": "download_ver2",
-    "version": "1.0",
-    "description": "notion_markdown_upload_to_github",
-    "permissions": [
-      "activeTab",
-      "scripting",
-      "cookies"
-
-        ],
-    "background": {
-      "service_worker": "background.js"
-    },
-    "action": {
-      "default_popup": "popup.html"
-    },
-    "host_permissions": [
-      "<all_urls>"
-    ],
-    "content_scripts": [
-        {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"]
-        }
-    ],
-    "web_accessible_resources": [
-      {
-        "resources": ["interceptor.js"],
-        "matches": ["<all_urls>"]
-      }
-    ]
-  }
+  "manifest_version": 3,
+  "name": "download_ver2",
+  "version": "1.0",
+  "description": "notion_markdown_upload_to_github",
+  "permissions": ["activeTab", "scripting", "cookies", "identity", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["interceptor.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
