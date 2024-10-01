@@ -1,9 +1,13 @@
+import {
+  GITHUB_ACCESSTOKEN_URL,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_REDIRECT_URI,
+  GITHUB_SCOPE,
+} from "./github/githubEnv.js";
+import { saveGithubAccessToken } from "./github/githubStorage.js";
+
 const NOTION_DOMAIN = "notion.so";
-const CLIENT_ID = "Ov23liJjIfn18PSsJh7i";
-const CLIENT_SECRET = "ea4bc508c97b8806e77e392c816a0769aad2e875";
-const REDIRECT_URI = chrome.identity.getRedirectURL();
-const GITHUB_ACCESSTOKEN_URL = "https://github.com/login/oauth/access_token";
-const GITHUB_SCOPE = "repo,user";
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type !== "FETCH_INTERCEPTED") {
@@ -54,7 +58,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     chrome.identity.launchWebAuthFlow(
       {
-        url: `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${GITHUB_SCOPE}`,
+        url: `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=${GITHUB_SCOPE}`,
         interactive: true,
       },
       async (redirectUri) => {
@@ -70,11 +74,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         }
         try {
           const access_token = await getAccessToken({ code });
-          console.log(access_token);
           if (!access_token) {
             console.error("Failed to retrieve access token");
             return;
           }
+          await saveGithubAccessToken(access_token);
+
           console.log("Authentication successful!");
         } catch (error) {
           console.error("Error during token exchange:", error);
@@ -94,10 +99,10 @@ async function getAccessToken({ code }) {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      client_id: GITHUB_CLIENT_ID,
+      client_secret: GITHUB_CLIENT_SECRET,
       code,
-      redirect_uri: REDIRECT_URI,
+      redirect_uri: GITHUB_REDIRECT_URI,
     }),
   });
   const data = await response.json();
