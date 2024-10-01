@@ -5,7 +5,8 @@
   "description": "notion_markdown_upload_to_github",
   "permissions": ["activeTab", "scripting", "cookies", "identity", "storage"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup.html"
