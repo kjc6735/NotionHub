@@ -49,30 +49,36 @@ const getCookies = async (domain) => {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.type === "auth") {
     let code = null;
-    await chrome.identity.launchWebAuthFlow(
+
+    sendResponse({ success: true, status: "pending", message: "인증 중..." });
+
+    chrome.identity.launchWebAuthFlow(
       {
         url: `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${GITHUB_SCOPE}`,
         interactive: true,
       },
       async (redirectUri) => {
-        // 결과 콜백
         if (chrome.runtime.lastError || !redirectUri) {
-          sendResponse({ success: false, error: chrome.runtime.lastError });
+          console.error("WebAuthFlow 에러 : ", chrome.runtime.lastError);
           return;
         }
         const urlParams = new URLSearchParams(new URL(redirectUri).search);
         code = urlParams.get("code");
         if (!code) {
-          sendResponse({ success: false, error: "로그인 실패" });
+          console.error("No code received from GitHub");
           return;
         }
-        const access_token = await getAccessToken({ code });
-        if (!access_token) {
-          sendResponse({ success: false, error: "로그인 실패" });
-          return;
+        try {
+          const access_token = await getAccessToken({ code });
+          console.log(access_token);
+          if (!access_token) {
+            console.error("Failed to retrieve access token");
+            return;
+          }
+          console.log("Authentication successful!");
+        } catch (error) {
+          console.error("Error during token exchange:", error);
         }
-
-        sendResponse({ success: true });
       }
     );
 
@@ -94,7 +100,7 @@ async function getAccessToken({ code }) {
       redirect_uri: REDIRECT_URI,
     }),
   });
-  const data = response.json();
+  const data = await response.json();
   /*
     {
         access_token: "",
@@ -102,6 +108,5 @@ async function getAccessToken({ code }) {
         token_type: "bearer"
     }
   */
-
   return data.access_token ?? null;
 }
